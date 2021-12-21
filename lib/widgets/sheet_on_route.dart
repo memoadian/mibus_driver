@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mibusdriver/models_api/options_end.dart';
 import '../consts/consts.dart' as consts;
 import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,6 +27,14 @@ class SheetOnRoute extends StatefulWidget {
 class _SheetOnRouteState extends State<SheetOnRoute> {
   SharedPreferences? _prefs;
   bool _onRoute = false;
+  String _selectedOption = "1";
+  String _hint = "Selecciona una opcion";
+
+  final List<OptionsEnd> _data = [
+    OptionsEnd(key: "1", value: "Finalizado"),
+    OptionsEnd(key: "2", value: "Falla mecánica"),
+    OptionsEnd(key: "3", value: "Avería"),
+  ];
 
   @override
   initState() {
@@ -190,43 +199,38 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       builder: (context) {
         return AlertDialog(
           title: Text(title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: DropdownButton(
-                    isExpanded: true,
-                    value: "0",
-                    items: const [
-                      DropdownMenuItem(
-                        child: Text("Seleccionar"),
-                        value: "0",
-                      ),
-                      DropdownMenuItem(
-                        child: Text("Finalizado"),
-                        value: "1",
-                      ),
-                      DropdownMenuItem(
-                        child: Text("Falla Mecánica"),
-                        value: "2",
-                      ),
-                      DropdownMenuItem(
-                        child: Text("Avería"),
-                        value: "3",
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        //_selected = value;
-                      });
-                    }),
-              ),
-              ElevatedButton(
-                onPressed: () => _endRoute(),
-                child: const Text("Finalizar"),
-              ),
-            ],
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: DropdownButton<OptionsEnd>(
+                      hint: Text(_hint),
+                      isExpanded: true,
+                      onChanged: (value) {
+                        _selectedOption = value!.key!; //valor
+                        _hint = value.value!; //texto
+                        setState(() {});
+                      },
+                      items: _data
+                          .map(
+                            (v) => DropdownMenuItem(
+                              value: v,
+                              child: Text(v.value!),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _endRoute(),
+                    child: const Text("Finalizar"),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },

@@ -46,6 +46,7 @@ class _RouteGuideState extends State<RouteGuide> {
 
   //location
   Location location = Location();
+  late LocationData _currentLocation;
   late bool _serviceEnabled;
   late PermissionStatus _permissionGranted;
 
@@ -98,6 +99,13 @@ class _RouteGuideState extends State<RouteGuide> {
         return;
       }
     }
+
+    _currentLocation = await location.getLocation();
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLng(
+        LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
+      ),
+    );
   }
 
   /// Get the route data
@@ -192,7 +200,7 @@ class _RouteGuideState extends State<RouteGuide> {
     var nextLng = _prefs?.getString('nextLng');
     if (_onRoute) {
       var _newTime = DateTime.now().millisecondsSinceEpoch;
-      if (_newTime - _currentTimeStamp >= 5000) {
+      if (_newTime - _currentTimeStamp >= 1000) {
         _currentTimeStamp = _newTime;
         if (nextLng != null && nextLat != null) {
           socketService.socket.emit("sendLocation", {
@@ -266,6 +274,7 @@ class _RouteGuideState extends State<RouteGuide> {
                   context: context,
                   builder: (_) => RoutesAvailable(
                     notifyParent: _updateRoute,
+                    driverId: _driverId,
                   ),
                 ),
                 child: const Icon(Icons.map),

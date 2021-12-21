@@ -4,14 +4,17 @@ import '/services/socket.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../consts/consts.dart' as consts;
 
 class RoutesAvailable extends StatefulWidget {
   final Function(dynamic route) notifyParent;
+  final String driverId;
 
   const RoutesAvailable({
     Key? key,
     required this.notifyParent,
+    required this.driverId,
   }) : super(key: key);
 
   @override
@@ -19,6 +22,8 @@ class RoutesAvailable extends StatefulWidget {
 }
 
 class _RoutesAvailableState extends State<RoutesAvailable> {
+  final storage = const FlutterSecureStorage();
+
   List<RouteMap> _routes = [];
   late RouteMap _route;
   int _currentTimeStamp = 0;
@@ -35,7 +40,8 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
   }
 
   Future<void> _getRoutes() async {
-    String routesUrl = '${consts.baseUrl}/routes';
+    String routesUrl = '${consts.baseUrl}/routes/driver/${widget.driverId}';
+    print(routesUrl);
     final Uri url = Uri.parse(routesUrl);
 
     final response = await http.get(url);
@@ -46,7 +52,9 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
 
       _routes = _list.map((model) => RouteMap.fromJson(model)).toList();
       setState(() {});
-    } else {}
+    } else {
+      throw Exception('Failed to load routes');
+    }
   }
 
   Future<void> _getRoute(id) async {
