@@ -5,6 +5,7 @@ import 'package:mibusdriver/models_api/options_end.dart';
 import '../consts/consts.dart' as consts;
 import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SheetOnRoute extends StatefulWidget {
   final String? selectedRoute;
@@ -25,10 +26,12 @@ class SheetOnRoute extends StatefulWidget {
 }
 
 class _SheetOnRouteState extends State<SheetOnRoute> {
+  final _storage = const FlutterSecureStorage();
   SharedPreferences? _prefs;
   bool _onRoute = false;
   String _selectedOption = "1";
   String _hint = "Selecciona una opcion";
+  String _auth = '';
 
   final List<OptionsEnd> _data = [
     OptionsEnd(key: "1", value: "Finalizado"),
@@ -39,12 +42,18 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
   @override
   initState() {
     _isOnRoute();
+    _getDriverData();
     super.initState();
   }
 
   _isOnRoute() async {
     _prefs = await SharedPreferences.getInstance();
     _onRoute = _prefs?.getBool('on_route') ?? false;
+    setState(() {});
+  }
+
+  Future<void> _getDriverData() async {
+    _auth = await _storage.read(key: 'auth') ?? '';
     setState(() {});
   }
 
@@ -59,6 +68,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       uri,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        "Authorization": "Bearer $_auth"
       },
       body: jsonEncode(<String, String>{
         'driverId': widget.driverId!,
@@ -89,6 +99,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       uri,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        "Authorization": "Bearer $_auth"
       },
       body: jsonEncode(<String, String>{
         'driverId': widget.driverId!,

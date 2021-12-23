@@ -22,17 +22,29 @@ class RoutesAvailable extends StatefulWidget {
 }
 
 class _RoutesAvailableState extends State<RoutesAvailable> {
-  final storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage();
 
   List<RouteMap> _routes = [];
   late RouteMap _route;
   int _currentTimeStamp = 0;
 
+  String _auth = '';
+
   @override
   void initState() {
-    _getRoutes();
+    _getData();
     _initTime();
     super.initState();
+  }
+
+  Future<void> _getData() async {
+    _auth = await _storage.read(key: 'auth') ?? '';
+
+    setState(() {
+      _auth = _auth;
+    });
+
+    _getRoutes();
   }
 
   void _initTime() {
@@ -41,10 +53,12 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
 
   Future<void> _getRoutes() async {
     String routesUrl = '${consts.baseUrl}/routes/driver/${widget.driverId}';
-    print(routesUrl);
     final Uri url = Uri.parse(routesUrl);
 
-    final response = await http.get(url);
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $_auth"},
+    );
 
     if (response.statusCode == 200) {
       final result = json.decode(response.body);

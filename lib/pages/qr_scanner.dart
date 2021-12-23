@@ -72,23 +72,23 @@ class QRReader extends StatefulWidget {
 }
 
 class _QRReaderState extends State<QRReader> {
-  final storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage();
   String _driverId = '';
-  //String _driverName = '';
+  String _auth = '';
 
   SharedPreferences? _prefs;
   String _selectedRouteId = '';
 
   @override
   initState() {
-    _getRouteData();
     _getDriverData();
+    _getRouteData();
     super.initState();
   }
 
   Future<void> _getDriverData() async {
-    //_driverName = await storage.read(key: 'name') ?? '';
-    _driverId = await storage.read(key: 'id') ?? '';
+    _auth = await _storage.read(key: 'auth') ?? '';
+    _driverId = await _storage.read(key: 'id') ?? '';
     setState(() {});
   }
 
@@ -217,6 +217,7 @@ class _QRReaderState extends State<QRReader> {
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        "Authorization": "Bearer $_auth"
       },
       body: jsonEncode(<String, String>{
         'code': code,
@@ -280,23 +281,23 @@ class QRReaderDown extends StatefulWidget {
 }
 
 class _QRReaderStateDown extends State<QRReaderDown> {
-  final storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage();
   String _driverId = '';
-  //String _driverName = '';
+  String _auth = '';
 
   SharedPreferences? _prefs;
   String _selectedRouteId = '';
 
   @override
   initState() {
-    _getRouteData();
     _getDriverData();
+    _getRouteData();
     super.initState();
   }
 
   Future<void> _getDriverData() async {
-    //_driverName = await storage.read(key: 'name') ?? '';
-    _driverId = await storage.read(key: 'id') ?? '';
+    _auth = await _storage.read(key: 'auth') ?? '';
+    _driverId = await _storage.read(key: 'id') ?? '';
     setState(() {});
   }
 
@@ -417,7 +418,7 @@ class _QRReaderStateDown extends State<QRReaderDown> {
   }
 
   Future<void> _setEmployeeOffRoute(String code) async {
-    String routesUrl = '${consts.baseUrl}/employees/off/';
+    String routesUrl = '${consts.baseUrl}/employees/off/$_selectedRouteId';
 
     final Uri url = Uri.parse(routesUrl);
 
@@ -425,6 +426,7 @@ class _QRReaderStateDown extends State<QRReaderDown> {
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        "Authorization": "Bearer $_auth"
       },
       body: jsonEncode(<String, String>{
         'code': code,
@@ -436,8 +438,8 @@ class _QRReaderStateDown extends State<QRReaderDown> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text("Empleado en Ruta"),
-          content: const Text("El Empleado fue registrado con éxito"),
+          title: const Text("Empleado fuera de Ruta"),
+          content: const Text("El empleado dejó la ruta con éxito"),
           actions: [
             TextButton(
               onPressed: () {

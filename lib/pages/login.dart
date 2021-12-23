@@ -33,7 +33,6 @@ class _LoginState extends State<Login> {
     prefs = await SharedPreferences.getInstance();
     //String loginUrl = 'http://192.168.56.1:5002/api/users/login';
     String loginUrl = '${consts.baseUrl}/drivers/login';
-    print(loginUrl);
     final Uri url = Uri.parse(loginUrl);
 
     final response = await http.post(url, body: {
@@ -41,7 +40,6 @@ class _LoginState extends State<Login> {
       'password': _passwordController.text,
     });
 
-    print(response.statusCode);
     if (response.statusCode == 200) {
       final result = json.decode(response.body);
       var login = LoginResult.fromJson(result);
@@ -50,6 +48,7 @@ class _LoginState extends State<Login> {
       await storage.write(key: 'id', value: login.driver?.id);
       await storage.write(key: 'name', value: login.driver?.name);
       await storage.write(key: 'email', value: login.driver?.email);
+      await storage.write(key: 'company', value: login.driver?.company);
 
       Navigator.pop(context);
       Navigator.pushReplacementNamed(context, 'route_guide');
