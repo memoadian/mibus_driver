@@ -33,6 +33,7 @@ class _LoginState extends State<Login> {
     prefs = await SharedPreferences.getInstance();
     //String loginUrl = 'http://192.168.56.1:5002/api/users/login';
     String loginUrl = '${consts.baseUrl}/drivers/login';
+    print(loginUrl);
     final Uri url = Uri.parse(loginUrl);
 
     final response = await http.post(url, body: {
@@ -40,6 +41,7 @@ class _LoginState extends State<Login> {
       'password': _passwordController.text,
     });
 
+    print(response.statusCode);
     if (response.statusCode == 200) {
       final result = json.decode(response.body);
       var login = LoginResult.fromJson(result);
