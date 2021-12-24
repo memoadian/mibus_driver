@@ -23,8 +23,8 @@ class RoutesAvailable extends StatefulWidget {
 
 class _RoutesAvailableState extends State<RoutesAvailable> {
   final _storage = const FlutterSecureStorage();
-
   List<RouteMap> _routes = [];
+  bool _isLoading = false;
   late RouteMap _route;
   int _currentTimeStamp = 0;
 
@@ -52,6 +52,10 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
   }
 
   Future<void> _getRoutes() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     String routesUrl = '${consts.baseUrl}/routes/driver/${widget.driverId}';
     final Uri url = Uri.parse(routesUrl);
 
@@ -69,6 +73,10 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
     } else {
       throw Exception('Failed to load routes');
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _getRoute(id) async {
@@ -123,32 +131,47 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
               ),
             ),
           ),
-          (_routes.isEmpty)
-              ? Container(
-                  padding: const EdgeInsets.all(20),
-                  child: Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: const CircularProgressIndicator(),
-                    ),
-                  ),
+          _isLoading
+              ? const Padding(
+                  padding: EdgeInsets.all(30),
+                  child: CircularProgressIndicator(),
                 )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: _routeBuilder,
-                  itemCount: _routes.length,
-                ),
+              : _buildRoutes(),
         ],
       ),
     );
+  }
+
+  Widget _buildRoutes() {
+    return (_routes.isEmpty)
+        ? Container(
+            padding: const EdgeInsets.all(20),
+            child: Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                child: const Text("No hay ruta asignada"),
+              ),
+            ),
+          )
+        : ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: _routeBuilder,
+            itemCount: _routes.length,
+            separatorBuilder: (context, index) => Divider(
+              color: Colors.grey[300],
+            ),
+          );
   }
 
   Widget _routeBuilder(BuildContext context, int index) {
     return InkWell(
       onTap: () => widget.notifyParent(_routes[index]),
       child: ListTile(
-        leading: const Icon(Icons.map),
+        leading: const Icon(
+          Icons.map,
+          color: Colors.green,
+        ),
         title: Text(_routes[index].name),
       ),
     );

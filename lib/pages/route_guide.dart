@@ -67,6 +67,7 @@ class _RouteGuideState extends State<RouteGuide> {
   String _driverId = '';
   String _selectedRoute = '';
   String _selectedRouteId = '';
+  String _auth = '';
   bool _onRoute = false;
 
   dynamic _markerIcon;
@@ -125,6 +126,7 @@ class _RouteGuideState extends State<RouteGuide> {
   Future<void> _getDriverData() async {
     _name = await storage.read(key: 'name') ?? '';
     _driverId = await storage.read(key: 'id') ?? '';
+    _auth = await storage.read(key: 'auth') ?? '';
     setState(() {});
   }
 
@@ -142,8 +144,13 @@ class _RouteGuideState extends State<RouteGuide> {
     String routeId = _prefs?.getString("routeId") ?? '';
 
     String url = "${consts.baseUrl}/routes/next_point/$routeId";
+    Uri uri = Uri.parse(url);
 
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(uri, headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $_auth',
+    });
 
     if (response.statusCode == 200) {
       final result = json.decode(response.body)['nextPoint'];
@@ -154,7 +161,7 @@ class _RouteGuideState extends State<RouteGuide> {
       _prefs?.setString('nextPointId', point.id);
     } else {
       Toast.show(
-        'Error',
+        response.body,
         context,
         duration: Toast.lengthLong,
       );

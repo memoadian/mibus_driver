@@ -72,7 +72,7 @@ class _LoginState extends State<Login> {
         gravity: Toast.bottom,
       );
       Navigator.pop(context);
-      throw Exception("Fallo al conectar al servidor");
+      //throw Exception("Fallo al conectar al servidor");
     }
   }
 
