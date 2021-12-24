@@ -8,15 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SheetOnRoute extends StatefulWidget {
-  final String? selectedRoute;
-  final String? selectedRouteId;
   final String? driverId;
   final Function(dynamic isOnRoute) notifyParent;
 
   const SheetOnRoute({
     Key? key,
-    this.selectedRoute,
-    this.selectedRouteId,
     this.driverId,
     required this.notifyParent,
   }) : super(key: key);
@@ -30,7 +26,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
   SharedPreferences? _prefs;
   bool _onRoute = false;
   String _selectedOption = "1";
-  String _hint = "Selecciona una opcion";
+  String _hint = "Finalizado";
   String _auth = '';
 
   final List<OptionsEnd> _data = [
@@ -60,7 +56,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
   Future<void> _initRoute() async {
     _showDialog("Iniciando Ruta");
 
-    var s = widget.selectedRouteId;
+    var s = _prefs?.getString('routeId') ?? '';
     String url = '${consts.baseUrl}/routes/init/$s';
     final Uri uri = Uri.parse(url);
 
@@ -91,7 +87,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
 
   Future<void> _endRoute() async {
     _showDialog("Finalizando Ruta");
-    var s = widget.selectedRouteId;
+    var s = _prefs?.getString('routeId') ?? '';
     String url = '${consts.baseUrl}/routes/finish/$s';
 
     final Uri uri = Uri.parse(url);
@@ -112,12 +108,17 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       _onRoute = false;
       widget.notifyParent(false);
       _prefs?.setBool('on_route', false);
+      _prefs?.setString('route', '');
+      _prefs?.setString('routeId', '');
       Toast.show('Se ha finalizado la ruta', context);
     } else {
       Toast.show(result['message'], context);
     }
     _prefs?.setBool('on_route', false);
     Navigator.pop(context);
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Navigator.pop(context);
+    });
     setState(() {});
   }
 
@@ -130,7 +131,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
         children: [
           Container(
             padding: const EdgeInsets.only(bottom: 12),
-            child: (widget.selectedRoute != '')
+            child: (_prefs!.getString("route") != '')
                 ? const Text(
                     "Ruta seleccionada:",
                     style: TextStyle(fontSize: 14),
@@ -141,12 +142,12 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
                   ),
           ),
           Container(
-            padding: (widget.selectedRoute != '')
+            padding: (_prefs!.getString("route") != '')
                 ? const EdgeInsets.only(top: 10, bottom: 10)
                 : const EdgeInsets.only(top: 0),
-            child: (widget.selectedRoute != '')
+            child: (_prefs!.getString("route") != '')
                 ? Text(
-                    widget.selectedRoute!,
+                    _prefs!.getString("route")!,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   )
                 : const Center(),
@@ -154,7 +155,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
           (!_onRoute)
               ? ElevatedButton(
                   onPressed: () {
-                    if (widget.selectedRoute != '') {
+                    if (_prefs!.getString("route") != '') {
                       _initRoute();
                     } else {
                       Toast.show("Selecciona una ruta primero", context);

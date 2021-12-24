@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:math';
 import 'dart:typed_data';
 import '/models_api/point_map.dart';
@@ -82,7 +81,6 @@ class _RouteGuideState extends State<RouteGuide> {
     super.initState();
   }
 
-  /// Get Permissions
   /// Get the permissions to use the location
   void _getPermissions() async {
     _serviceEnabled = await location.serviceEnabled();
@@ -115,14 +113,17 @@ class _RouteGuideState extends State<RouteGuide> {
     _selectedRouteId = _prefs?.getString('routeId') ?? '';
   }
 
+  /// Set time init to send location
   void _initTime() {
     _currentTimeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
+  /// Set icon check point on map
   void _setCheckedIcon() async {
     _markerIcon = await getBytesFromAsset('assets/location.png', 100);
   }
 
+  /// Get driver data
   Future<void> _getDriverData() async {
     _name = await storage.read(key: 'name') ?? '';
     _driverId = await storage.read(key: 'id') ?? '';
@@ -130,6 +131,7 @@ class _RouteGuideState extends State<RouteGuide> {
     setState(() {});
   }
 
+  /// Transform icon to bytes to put on map
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
@@ -140,6 +142,7 @@ class _RouteGuideState extends State<RouteGuide> {
         .asUint8List();
   }
 
+  /// Get next point to check in on the route
   Future<void> _getNextPoint() async {
     String routeId = _prefs?.getString("routeId") ?? '';
 
@@ -168,13 +171,14 @@ class _RouteGuideState extends State<RouteGuide> {
     }
   }
 
+  /// clear markers and polylines
   void _clearMarkers() {
     _markers.clear();
     setState(() {});
   }
 
+  /// Ser route on map
   dynamic _updateRoute(dynamic route) {
-    inspect(route);
     _rebuildPolyline(route);
     setState(() {});
   }
@@ -187,6 +191,7 @@ class _RouteGuideState extends State<RouteGuide> {
     setState(() {});
   }
 
+  /// Join to route socket server
   void _joinToRoute(BuildContext context) async {
     final socketService = Provider.of<SocketService>(context, listen: false);
 
@@ -202,6 +207,7 @@ class _RouteGuideState extends State<RouteGuide> {
     }
   }
 
+  /// Send data socket to server
   void _sendDataSocket(socketService, newLocation) {
     var nextLat = _prefs?.getString('nextLat');
     var nextLng = _prefs?.getString('nextLng');
@@ -298,8 +304,6 @@ class _RouteGuideState extends State<RouteGuide> {
                   ),
                   context: context,
                   builder: (_) => SheetOnRoute(
-                    selectedRoute: _selectedRoute,
-                    selectedRouteId: _selectedRouteId,
                     driverId: _driverId,
                     notifyParent: _initRoute,
                   ),
@@ -318,6 +322,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _mapController = controller;
   }
 
+  /// Center view on select route
   void _centerView(BuildContext context) async {
     var api = Provider.of<DirectionProvider>(context, listen: false);
     await _mapController!.getVisibleRegion();
@@ -345,6 +350,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _mapController!.animateCamera(cameraUpdate);
   }
 
+  /// Add marker to map
   void _addMarker({required PointMap point, var prefix}) {
     Marker marker = Marker(
       markerId: MarkerId("${prefix}_${point.name}"),
@@ -365,6 +371,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _markers.add(marker);
   }
 
+  /// Draw polylin on route selected
   void _rebuildPolyline(route) {
     _clearMarkers();
 
@@ -375,6 +382,8 @@ class _RouteGuideState extends State<RouteGuide> {
     _addMarker(point: route.destiny, prefix: 'd');
     _selectedRoute = route.name;
     _selectedRouteId = route.id;
+    _prefs!.setString("route", _selectedRoute);
+    _prefs!.setString("routeId", _selectedRouteId);
     _fromPoint = LatLng(
       double.parse(route.origin.lat),
       double.parse(route.origin.lng),
@@ -398,6 +407,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _getPolyline();
   }
 
+  /// Get polyline from API
   void _getPolyline() async {
     polylineCoordinates.clear();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
@@ -415,6 +425,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _addPolyLine();
   }
 
+  /// Add polyline to map
   void _addPolyLine() {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(

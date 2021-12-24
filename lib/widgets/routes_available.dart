@@ -23,9 +23,9 @@ class RoutesAvailable extends StatefulWidget {
 
 class _RoutesAvailableState extends State<RoutesAvailable> {
   final _storage = const FlutterSecureStorage();
+  late RouteMap _route;
   List<RouteMap> _routes = [];
   bool _isLoading = false;
-  late RouteMap _route;
   int _currentTimeStamp = 0;
 
   String _auth = '';
@@ -136,7 +136,10 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
                   padding: EdgeInsets.all(30),
                   child: CircularProgressIndicator(),
                 )
-              : _buildRoutes(),
+              : Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: _buildRoutes(),
+                ),
         ],
       ),
     );
@@ -149,7 +152,7 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
             child: Center(
               child: Container(
                 margin: const EdgeInsets.only(bottom: 20),
-                child: const Text("No hay ruta asignada"),
+                child: const Text("No tienes ruta asignada"),
               ),
             ),
           )
