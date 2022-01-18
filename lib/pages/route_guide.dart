@@ -81,14 +81,20 @@ class _RouteGuideState extends State<RouteGuide> {
     super.initState();
   }
 
+  /// CHeck permissions to whow location on init
+  Future<bool> _checkPermissions() async {
+    _serviceEnabled = await location.serviceEnabled();
+    return _serviceEnabled;
+  }
+
   /// Get the permissions to use the location
   void _getPermissions() async {
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
+    try {
+      _serviceEnabled = await location.serviceEnabled();
+    } on PlatformException catch (e) {
+      print(e);
+      _serviceEnabled = false;
+      _getPermissions();
     }
 
     _permissionGranted = await location.hasPermission();
@@ -162,7 +168,9 @@ class _RouteGuideState extends State<RouteGuide> {
       _prefs?.setString('nextLat', point.lat.toString());
       _prefs?.setString('nextLng', point.lng.toString());
       _prefs?.setString('nextPointId', point.id);
+      print("siguiente punto: ${point.id}");
     } else {
+      print("algo salió mal");
       Toast.show(
         response.body,
         context,
@@ -249,14 +257,26 @@ class _RouteGuideState extends State<RouteGuide> {
       ),
       body: Consumer<DirectionProvider>(
         builder: (context, api, child) {
-          return GoogleMap(
-            myLocationButtonEnabled: true,
-            zoomControlsEnabled: true,
-            initialCameraPosition: _initialCameraPosition,
-            myLocationEnabled: true,
-            markers: _markers,
-            polylines: Set<Polyline>.of(polylines.values), //api.currentRoute,
-            onMapCreated: _onMapCreated,
+          return FutureBuilder(
+            initialData: false,
+            future: _checkPermissions(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return GoogleMap(
+                  myLocationButtonEnabled: true,
+                  zoomControlsEnabled: true,
+                  initialCameraPosition: _initialCameraPosition,
+                  myLocationEnabled: true,
+                  markers: _markers,
+                  polylines:
+                      Set<Polyline>.of(polylines.values), //api.currentRoute,
+                  onMapCreated: _onMapCreated,
+                );
+              }
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            },
           );
         },
       ),
@@ -334,20 +354,22 @@ class _RouteGuideState extends State<RouteGuide> {
     var top = max(_fromPoint.longitude, _toPoint.longitude);
     var bottom = min(_fromPoint.longitude, _toPoint.longitude);
 
-    for (var point in api.currentRoute.first.points) {
-      left = min(left, point.latitude);
-      right = max(right, point.latitude);
-      top = max(top, point.longitude);
-      bottom = min(bottom, point.longitude);
-    }
+    await Future.delayed(const Duration(milliseconds: 450), () {
+      for (var point in api.currentRoute.first.points) {
+        left = min(left, point.latitude);
+        right = max(right, point.latitude);
+        top = max(top, point.longitude);
+        bottom = min(bottom, point.longitude);
+      }
 
-    var bounds = LatLngBounds(
-      southwest: LatLng(left, bottom),
-      northeast: LatLng(right, top),
-    );
+      var bounds = LatLngBounds(
+        southwest: LatLng(left, bottom),
+        northeast: LatLng(right, top),
+      );
 
-    var cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
-    _mapController!.animateCamera(cameraUpdate);
+      var cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
+      _mapController!.animateCamera(cameraUpdate);
+    });
   }
 
   /// Add marker to map
