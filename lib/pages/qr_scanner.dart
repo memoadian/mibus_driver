@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:http/http.dart' as http;
 import '../consts/consts.dart' as consts;

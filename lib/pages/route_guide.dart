@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:mibusdriver/models_api/route_map.dart';
+
 import '/models_api/point_map.dart';
 import '/providers/directions_provider.dart';
 import '/services/socket.dart';
@@ -10,7 +12,6 @@ import '/widgets/sheet_on_route.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:google_maps_webservice/directions.dart' as dirs;
 import 'package:http/http.dart' as http;
 import '../consts/consts.dart' as consts;
 import 'dart:ui' as ui;
@@ -38,9 +39,6 @@ class _RouteGuideState extends State<RouteGuide> {
   );
 
   // set initial positions
-  LatLng _fromPoint = const LatLng(19.311980, -99.042600);
-  LatLng _toPoint = const LatLng(19.314345, -99.039363);
-  List<dirs.Waypoint> _points = [];
   final Set<Marker> _markers = <Marker>{};
 
   //location
@@ -58,7 +56,6 @@ class _RouteGuideState extends State<RouteGuide> {
   //FLutter polyline
   String googleApiKey = "AIzaSyC11BhEN26L3kn-NIZrLZWuJ0ThQOp2dfs";
   PolylinePoints polylinePoints = PolylinePoints();
-  List<PolylineWayPoint> _polywaypts = [];
 
   //driver data
   final storage = const FlutterSecureStorage();
@@ -343,33 +340,37 @@ class _RouteGuideState extends State<RouteGuide> {
   }
 
   /// Center view on select route
-  void _centerView(BuildContext context) async {
-    var api = Provider.of<DirectionProvider>(context, listen: false);
+  void _centerView(RouteMap route) async {
+    //var api = Provider.of<DirectionProvider>(context, listen: false);
     await _mapController!.getVisibleRegion();
 
-    api.findDirections(_fromPoint, _toPoint, _points);
+    //api.findDirections(_fromPoint, _toPoint, _points);
 
-    var left = min(_fromPoint.latitude, _toPoint.latitude);
-    var right = max(_fromPoint.latitude, _toPoint.latitude);
-    var top = max(_fromPoint.longitude, _toPoint.longitude);
-    var bottom = min(_fromPoint.longitude, _toPoint.longitude);
+    var _fromLat = double.parse(route.points[0].lat);
+    var _fromLng = double.parse(route.points[0].lng);
+    var _toLat = double.parse(route.points[route.points.length - 1].lat);
+    var _toLng = double.parse(route.points[route.points.length - 1].lng);
 
-    await Future.delayed(const Duration(milliseconds: 450), () {
-      for (var point in api.currentRoute.first.points) {
-        left = min(left, point.latitude);
-        right = max(right, point.latitude);
-        top = max(top, point.longitude);
-        bottom = min(bottom, point.longitude);
-      }
+    var left = min(_fromLat, _toLat);
+    var right = max(_fromLat, _toLat);
+    var top = max(_fromLng, _toLng);
+    var bottom = min(_fromLng, _toLng);
 
-      var bounds = LatLngBounds(
-        southwest: LatLng(left, bottom),
-        northeast: LatLng(right, top),
-      );
+    for (var point in route.points) {
+      left = min(left, double.parse(point.lat));
+      right = max(right, double.parse(point.lat));
+      top = max(top, double.parse(point.lng));
+      bottom = min(bottom, double.parse(point.lng));
+    }
 
-      var cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
-      _mapController!.animateCamera(cameraUpdate);
-    });
+    var bounds = LatLngBounds(
+      southwest: LatLng(left, bottom),
+      northeast: LatLng(right, top),
+    );
+
+    var cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
+    _mapController!.animateCamera(cameraUpdate);
+    //});
   }
 
   /// Add marker to map
@@ -400,55 +401,28 @@ class _RouteGuideState extends State<RouteGuide> {
     for (var e in route.points) {
       _addMarker(point: e, prefix: 'e');
     }
-    _addMarker(point: route.origin, prefix: 'o');
-    _addMarker(point: route.destiny, prefix: 'd');
+    _addMarker(point: route.points[0], prefix: 'o');
+    _addMarker(point: route.points[route.points.length - 1], prefix: 'd');
     _selectedRoute = route.name;
     _selectedRouteId = route.id;
     _prefs!.setString("route", _selectedRoute);
     _prefs!.setString("routeId", _selectedRouteId);
-    _fromPoint = LatLng(
-      double.parse(route.origin.lat),
-      double.parse(route.origin.lng),
-    );
-    _toPoint = LatLng(
-      double.parse(route.destiny.lat),
-      double.parse(route.destiny.lng),
-    );
-    _points = route.points
-        .map<dirs.Waypoint>(
-          (e) => dirs.Waypoint(e.name),
-        )
-        .toList();
-    _polywaypts = route.points
-        .map<PolylineWayPoint>(
-          (e) => PolylineWayPoint(location: e.name),
-        )
-        .toList();
-    setState(() {});
-    _centerView(context);
-    _getPolyline();
-  }
 
-  /// Get polyline from API
-  void _getPolyline() async {
-    polylineCoordinates.clear();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey,
-      PointLatLng(_fromPoint.latitude, _fromPoint.longitude),
-      PointLatLng(_toPoint.latitude, _toPoint.longitude),
-      travelMode: TravelMode.driving,
-      wayPoints: _polywaypts,
-    );
-    if (result.points.isNotEmpty) {
-      for (var point in result.points) {
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      }
-    }
-    _addPolyLine();
+    setState(() {});
+    _centerView(route);
+    _addPolyLine(route);
   }
 
   /// Add polyline to map
-  void _addPolyLine() {
+  void _addPolyLine(RouteMap route) {
+    var polylineCoordinates = <LatLng>[];
+    String _polyline = route.overview;
+    List<PointLatLng> points = polylinePoints.decodePolyline(
+      _polyline,
+    );
+    points.forEach((e) {
+      polylineCoordinates.add(LatLng(e.latitude, e.longitude));
+    });
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,

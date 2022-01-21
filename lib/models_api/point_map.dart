@@ -15,7 +15,7 @@ class PointMap {
 
   factory PointMap.fromJson(Map<String, dynamic> json) {
     return PointMap(
-      id: json['_id'],
+      id: json['id'],
       name: json['name'],
       lat: json['lat'],
       lng: json['lng'],

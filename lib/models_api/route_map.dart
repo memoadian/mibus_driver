@@ -4,28 +4,25 @@ class RouteMap {
   String id;
   String name;
   String company;
-  PointMap origin;
-  PointMap destiny;
+  String overview;
   List<PointMap> points;
 
   RouteMap({
     this.id = "",
     this.name = "",
     this.company = "",
-    required this.origin,
-    required this.destiny,
+    this.overview = "",
     required this.points,
   });
 
   factory RouteMap.fromJson(Map<String, dynamic> json) {
-    var list = json['points'] as List;
+    Iterable list = json['points'];
     var pointsList = list.map((e) => PointMap.fromJson(e)).toList();
     return RouteMap(
       id: json['id'],
       name: json['name'],
       company: json['company'],
-      origin: PointMap.fromJson(json['origin']),
-      destiny: PointMap.fromJson(json['destiny']),
+      overview: json['overview'],
       points: pointsList,
     );
   }
@@ -36,8 +33,6 @@ class RouteMap {
     map['id'] = id;
     map['name'] = name;
     map['company'] = company;
-    map['origin'] = origin;
-    map['destiny'] = destiny;
     map['points'] = points;
 
     return map;
@@ -48,8 +43,6 @@ class RouteMap {
       'id': id,
       'name': name,
       'company': company,
-      'origin': origin.toJson(),
-      'destiny': destiny.toJson(),
       'points': points,
     };
   }
