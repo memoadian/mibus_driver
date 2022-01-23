@@ -24,8 +24,8 @@ class SheetOnRoute extends StatefulWidget {
 class _SheetOnRouteState extends State<SheetOnRoute> {
   final _storage = const FlutterSecureStorage();
   SharedPreferences? _prefs;
+  String _route = "";
   bool _onRoute = false;
-  String _selectedOption = "1";
   String _hint = "Finalizado";
   String _auth = '';
 
@@ -44,6 +44,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
 
   _isOnRoute() async {
     _prefs = await SharedPreferences.getInstance();
+    _route = _prefs?.getString('route') ?? "";
     _onRoute = _prefs?.getBool('on_route') ?? false;
     setState(() {});
   }
@@ -131,7 +132,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
         children: [
           Container(
             padding: const EdgeInsets.only(bottom: 12),
-            child: (_prefs!.getString("route") != '')
+            child: (_route != '')
                 ? const Text(
                     "Ruta seleccionada:",
                     style: TextStyle(fontSize: 14),
@@ -142,12 +143,12 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
                   ),
           ),
           Container(
-            padding: (_prefs!.getString("route") != '')
+            padding: (_route != '')
                 ? const EdgeInsets.only(top: 10, bottom: 10)
                 : const EdgeInsets.only(top: 0),
-            child: (_prefs!.getString("route") != '')
+            child: (_route != '')
                 ? Text(
-                    _prefs!.getString("route")!,
+                    _route,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   )
                 : const Center(),
@@ -155,7 +156,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
           (!_onRoute)
               ? ElevatedButton(
                   onPressed: () {
-                    if (_prefs!.getString("route") != '') {
+                    if (_route != '') {
                       _initRoute();
                     } else {
                       Toast.show("Selecciona una ruta primero", context);
@@ -222,8 +223,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
                       hint: Text(_hint),
                       isExpanded: true,
                       onChanged: (value) {
-                        _selectedOption = value!.key!; //valor
-                        _hint = value.value!; //texto
+                        _hint = value!.value!; //texto
                         setState(() {});
                       },
                       items: _data
