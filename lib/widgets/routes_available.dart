@@ -89,33 +89,8 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
     });
   }
 
-  Future<void> _getRoute(id) async {
-    String routeUrl = '${consts.baseUrl}/routes/$id';
-
-    var _newTime = DateTime.now().millisecondsSinceEpoch;
-    if (_newTime - _currentTimeStamp >= 10000) {
-      _currentTimeStamp = _newTime;
-      final Uri url = Uri.parse(routeUrl);
-
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body)['route'];
-        _route = RouteMap.fromJson(result);
-        widget.notifyParent(_route);
-      } else {}
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final socketService = Provider.of<SocketService>(context);
-
-    socketService.socket.on("rebuildRoute", (payload) {
-      var routeId = payload['routeId'];
-      _getRoute(routeId);
-    });
-
     return SingleChildScrollView(
       child: Column(
         children: [

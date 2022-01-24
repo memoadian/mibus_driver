@@ -65,6 +65,7 @@ class _RouteGuideState extends State<RouteGuide> {
   String _selectedRouteId = '';
   String _auth = '';
   bool _onRoute = false;
+  bool _routeFinished = false;
 
   dynamic _markerIcon;
 
@@ -89,7 +90,6 @@ class _RouteGuideState extends State<RouteGuide> {
     try {
       _serviceEnabled = await location.serviceEnabled();
     } on PlatformException catch (e) {
-      print(e);
       _serviceEnabled = false;
       _getPermissions();
     }
@@ -116,6 +116,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _selectedRoute = _prefs?.getString('route') ?? '';
     _selectedRouteId = _prefs?.getString('routeId') ?? '';
     _onRoute = _prefs?.getBool('onRoute') ?? false;
+    _routeFinished = _prefs?.getBool('routeFinished') ?? false;
   }
 
   /// Set time init to send location
@@ -154,27 +155,49 @@ class _RouteGuideState extends State<RouteGuide> {
     String url = "${consts.baseUrl}/routes/next_point/$routeId";
     Uri uri = Uri.parse(url);
 
-    final response = await http.get(uri, headers: {
+    if (!_routeFinished) {
+      final response = await http.get(uri, headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $_auth',
+      });
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body)['nextPoint'];
+        final point = PointMap.fromJson(result);
+
+        _prefs?.setString('nextLat', point.lat.toString());
+        _prefs?.setString('nextLng', point.lng.toString());
+        _prefs?.setString('nextPointId', point.id);
+      } else {
+        _prefs?.setBool('routeFinished', true);
+        _routeFinished = true;
+        Toast.show(
+          response.body,
+          context,
+          duration: Toast.lengthLong,
+        );
+      }
+    }
+  }
+
+  /// get route points
+  /// @param routeId
+  Future<void> _getRoute(routeId) async {
+    String routeUrl = '${consts.baseUrl}/routes/$routeId';
+    final Uri url = Uri.parse(routeUrl);
+
+    final response = await http.get(url, headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': 'Bearer $_auth',
     });
 
     if (response.statusCode == 200) {
-      final result = json.decode(response.body)['nextPoint'];
-      final point = PointMap.fromJson(result);
+      final _result = json.decode(response.body)['route'];
+      final _route = RouteMap.fromJson(_result);
 
-      _prefs?.setString('nextLat', point.lat.toString());
-      _prefs?.setString('nextLng', point.lng.toString());
-      _prefs?.setString('nextPointId', point.id);
-      print("siguiente punto: ${point.id}");
-    } else {
-      print("algo salió mal");
-      Toast.show(
-        response.body,
-        context,
-        duration: Toast.lengthLong,
-      );
+      _rebuildMarkers(_route);
     }
   }
 
@@ -184,6 +207,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _selectedRouteId = route.id;
     _prefs!.setString("route", _selectedRoute);
     _prefs!.setString("routeId", _selectedRouteId);
+    _joinToRoute(context);
     _rebuildMarkers(route);
   }
 
@@ -208,6 +232,8 @@ class _RouteGuideState extends State<RouteGuide> {
       socketService.socket.emit("leave", {
         "route": _selectedRoute,
       });
+      _prefs?.setBool("routeFinished", false);
+      _routeFinished = false;
     }
   }
 
@@ -240,11 +266,14 @@ class _RouteGuideState extends State<RouteGuide> {
     final socketService = Provider.of<SocketService>(context);
 
     location.onLocationChanged.listen((LocationData newLocation) {
-      print(_onRoute);
       _sendDataSocket(socketService, newLocation);
     });
 
     socketService.socket.on("rebuildRoute", (payload) {
+      if (!_routeFinished) {
+        var routeId = payload['routeId'];
+        _getRoute(routeId);
+      }
       _getNextPoint();
     });
 
