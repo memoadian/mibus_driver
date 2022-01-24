@@ -33,6 +33,7 @@ class RouteMap {
     map['id'] = id;
     map['name'] = name;
     map['company'] = company;
+    map['overview'] = overview;
     map['points'] = points;
 
     return map;

@@ -113,7 +113,9 @@ class _RouteGuideState extends State<RouteGuide> {
   /// Get the route data
   void _getRouteData() async {
     _prefs = await SharedPreferences.getInstance();
+    _selectedRoute = _prefs?.getString('route') ?? '';
     _selectedRouteId = _prefs?.getString('routeId') ?? '';
+    _onRoute = _prefs?.getBool('onRoute') ?? false;
   }
 
   /// Set time init to send location
@@ -176,22 +178,19 @@ class _RouteGuideState extends State<RouteGuide> {
     }
   }
 
-  /// clear markers and polylines
-  void _clearMarkers() {
-    _markers.clear();
-    setState(() {});
-  }
-
   /// Ser route on map
   dynamic _updateRoute(dynamic route) {
-    _rebuildPolyline(route);
-    setState(() {});
+    _selectedRoute = route.name;
+    _selectedRouteId = route.id;
+    _prefs!.setString("route", _selectedRoute);
+    _prefs!.setString("routeId", _selectedRouteId);
+    _rebuildMarkers(route);
   }
 
   ///Init route data
   dynamic _initRoute(dynamic _isOnRoute) {
     _onRoute = _isOnRoute;
-    _prefs?.setString("routeId", _selectedRouteId);
+    _prefs?.setBool('onRoute', _onRoute);
     _joinToRoute(context);
     setState(() {});
   }
@@ -241,6 +240,7 @@ class _RouteGuideState extends State<RouteGuide> {
     final socketService = Provider.of<SocketService>(context);
 
     location.onLocationChanged.listen((LocationData newLocation) {
+      print(_onRoute);
       _sendDataSocket(socketService, newLocation);
     });
 
@@ -373,6 +373,11 @@ class _RouteGuideState extends State<RouteGuide> {
     //});
   }
 
+  /// clear markers and polylines
+  void _clearMarkers() {
+    _markers.clear();
+  }
+
   /// Add marker to map
   void _addMarker({required PointMap point, var prefix}) {
     Marker marker = Marker(
@@ -395,7 +400,7 @@ class _RouteGuideState extends State<RouteGuide> {
   }
 
   /// Draw polylin on route selected
-  void _rebuildPolyline(route) {
+  void _rebuildMarkers(route) {
     _clearMarkers();
 
     for (var e in route.points) {
@@ -403,12 +408,7 @@ class _RouteGuideState extends State<RouteGuide> {
     }
     _addMarker(point: route.points[0], prefix: 'o');
     _addMarker(point: route.points[route.points.length - 1], prefix: 'd');
-    _selectedRoute = route.name;
-    _selectedRouteId = route.id;
-    _prefs!.setString("route", _selectedRoute);
-    _prefs!.setString("routeId", _selectedRouteId);
 
-    setState(() {});
     _centerView(route);
     _addPolyLine(route);
   }

@@ -31,48 +31,57 @@ class _LoginState extends State<Login> {
 
   Future<void> _requestLogin(context) async {
     prefs = await SharedPreferences.getInstance();
-    //String loginUrl = 'http://192.168.56.1:5002/api/users/login';
     String loginUrl = '${consts.baseUrl}/drivers/login';
     final Uri url = Uri.parse(loginUrl);
 
-    final response = await http.post(url, body: {
-      'email': _emailController.text,
-      'password': _passwordController.text,
-    });
+    try {
+      final response = await http.post(url, body: {
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      });
 
-    if (response.statusCode == 200) {
-      final result = json.decode(response.body);
-      var login = LoginResult.fromJson(result);
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        var login = LoginResult.fromJson(result);
 
-      await storage.write(key: 'auth', value: login.token);
-      await storage.write(key: 'id', value: login.driver?.id);
-      await storage.write(key: 'name', value: login.driver?.name);
-      await storage.write(key: 'email', value: login.driver?.email);
-      await storage.write(key: 'company', value: login.driver?.company);
+        await storage.write(key: 'auth', value: login.token);
+        await storage.write(key: 'id', value: login.driver?.id);
+        await storage.write(key: 'name', value: login.driver?.name);
+        await storage.write(key: 'email', value: login.driver?.email);
+        await storage.write(key: 'company', value: login.driver?.company);
 
-      Navigator.pop(context);
-      Navigator.pushReplacementNamed(context, 'route_guide');
-      await prefs.setBool('isLoggedIn', true);
-    } else if (response.statusCode == 401) {
-      final result = json.decode(response.body);
-      var login = LoginResult.fromJson(result);
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, 'route_guide');
+        await prefs.setBool('isLoggedIn', true);
+      } else if (response.statusCode == 401) {
+        final result = json.decode(response.body);
+        var login = LoginResult.fromJson(result);
 
+        Toast.show(
+          login.message,
+          context,
+          duration: Toast.lengthLong,
+          gravity: Toast.bottom,
+        );
+        Navigator.pop(context);
+      } else {
+        Toast.show(
+          "Ocurrió un error al iniciar sesión",
+          context,
+          duration: Toast.lengthLong,
+          gravity: Toast.bottom,
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
       Toast.show(
-        login.message,
+        "Error de conexión con el servidor",
         context,
         duration: Toast.lengthLong,
         gravity: Toast.bottom,
       );
       Navigator.pop(context);
-    } else {
-      Toast.show(
-        "Ocurrió un error al iniciar sesión",
-        context,
-        duration: Toast.lengthLong,
-        gravity: Toast.bottom,
-      );
-      Navigator.pop(context);
-      //throw Exception("Fallo al conectar al servidor");
+      return;
     }
   }
 
