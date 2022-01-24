@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '/models_api/route_map.dart';
 import '/services/socket.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,7 @@ class RoutesAvailable extends StatefulWidget {
 
 class _RoutesAvailableState extends State<RoutesAvailable> {
   final _storage = const FlutterSecureStorage();
+  late SharedPreferences _prefs;
   late RouteMap _route;
   List<RouteMap> _routes = [];
   bool _isLoading = false;
@@ -32,9 +35,14 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
 
   @override
   void initState() {
+    _getPrefs();
     _getData();
     _initTime();
     super.initState();
+  }
+
+  void _getPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
   }
 
   Future<void> _getData() async {
@@ -70,6 +78,8 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
 
       _routes = _list.map((model) => RouteMap.fromJson(model)).toList();
       setState(() {});
+    } else if (response.statusCode == 401) {
+      _closeSession(context);
     } else {
       throw Exception('Failed to load routes');
     }
@@ -177,6 +187,15 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
         ),
         title: Text(_routes[index].name),
       ),
+    );
+  }
+
+  void _closeSession(context) {
+    _storage.deleteAll();
+    _prefs.clear();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      'login',
+      (Route<dynamic> route) => false,
     );
   }
 }
