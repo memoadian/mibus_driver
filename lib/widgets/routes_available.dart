@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/models_api/route_map.dart';
-import '/services/socket.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../consts/consts.dart' as consts;
 
@@ -26,10 +24,8 @@ class RoutesAvailable extends StatefulWidget {
 class _RoutesAvailableState extends State<RoutesAvailable> {
   final _storage = const FlutterSecureStorage();
   late SharedPreferences _prefs;
-  late RouteMap _route;
   List<RouteMap> _routes = [];
   bool _isLoading = false;
-  int _currentTimeStamp = 0;
 
   String _auth = '';
 
@@ -37,7 +33,6 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
   void initState() {
     _getPrefs();
     _getData();
-    _initTime();
     super.initState();
   }
 
@@ -53,10 +48,6 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
     });
 
     _getRoutes();
-  }
-
-  void _initTime() {
-    _currentTimeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
   Future<void> _getRoutes() async {

@@ -110,6 +110,14 @@ class _RouteGuideState extends State<RouteGuide> {
     );
   }
 
+  /// Get driver data
+  Future<void> _getDriverData() async {
+    _name = await storage.read(key: 'name') ?? '';
+    _driverId = await storage.read(key: 'id') ?? '';
+    _auth = await storage.read(key: 'auth') ?? '';
+    setState(() {});
+  }
+
   /// Get the route data
   void _getRouteData() async {
     _prefs = await SharedPreferences.getInstance();
@@ -127,14 +135,6 @@ class _RouteGuideState extends State<RouteGuide> {
   /// Set icon check point on map
   void _setCheckedIcon() async {
     _markerIcon = await getBytesFromAsset('assets/location.png', 100);
-  }
-
-  /// Get driver data
-  Future<void> _getDriverData() async {
-    _name = await storage.read(key: 'name') ?? '';
-    _driverId = await storage.read(key: 'id') ?? '';
-    _auth = await storage.read(key: 'auth') ?? '';
-    setState(() {});
   }
 
   /// Transform icon to bytes to put on map
@@ -246,6 +246,7 @@ class _RouteGuideState extends State<RouteGuide> {
       if (_newTime - _currentTimeStamp >= 1000) {
         _currentTimeStamp = _newTime;
         if (nextLng != null && nextLat != null) {
+          print("enviando ubicacion");
           socketService.socket.emit("sendLocation", {
             "uuid": _name,
             "lat": newLocation.latitude,
@@ -409,6 +410,9 @@ class _RouteGuideState extends State<RouteGuide> {
 
   /// Add marker to map
   void _addMarker({required PointMap point, var prefix}) {
+    //print(i);
+    print(prefix);
+    //i++;
     Marker marker = Marker(
       markerId: MarkerId("${prefix}_${point.name}"),
       position: LatLng(
@@ -433,10 +437,8 @@ class _RouteGuideState extends State<RouteGuide> {
     _clearMarkers();
 
     for (var e in route.points) {
-      _addMarker(point: e, prefix: 'e');
+      _addMarker(point: e, prefix: 'e-${e.lat}${e.lng}');
     }
-    _addMarker(point: route.points[0], prefix: 'o');
-    _addMarker(point: route.points[route.points.length - 1], prefix: 'd');
 
     _centerView(route);
     _addPolyLine(route);

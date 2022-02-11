@@ -24,7 +24,7 @@ class SocketService with ChangeNotifier {
      * socket io 2.3.0
      * in production works fine with version 3
      */
-    _socket = io.io('https://trackingapi.memoadian.com', {
+    _socket = io.io('https://api.mytrackingbus.com', {
       //IO.Socket socket = IO.io('http://192.168.56.1:5002', {
       'transports': ['websocket'],
       'autoConnect': true
