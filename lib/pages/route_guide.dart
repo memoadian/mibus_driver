@@ -410,9 +410,6 @@ class _RouteGuideState extends State<RouteGuide> {
 
   /// Add marker to map
   void _addMarker({required PointMap point, var prefix}) {
-    //print(i);
-    print(prefix);
-    //i++;
     Marker marker = Marker(
       markerId: MarkerId("${prefix}_${point.name}"),
       position: LatLng(

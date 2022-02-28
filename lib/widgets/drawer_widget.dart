@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DrawerWidget extends StatefulWidget {
@@ -19,12 +20,22 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   String _name = '';
   String _email = '';
   String _image = '';
+  String version = '';
+  String buildNumber = '';
 
   @override
   void initState() {
     _getPrefs();
     _getData();
+    _getInfoApp();
     super.initState();
+  }
+
+  void _getInfoApp() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    version = packageInfo.version;
+    buildNumber = packageInfo.buildNumber;
   }
 
   void _getPrefs() async {
@@ -110,6 +121,16 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                     Navigator.pop(context);
                     _closeDialog(context);
                   },
+                ),
+                ListTile(
+                  subtitle: Text(
+                    "Versión: $version - Build: $buildNumber",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF666666),
+                      fontSize: 10,
+                    ),
+                  ),
                 ),
               ],
             ).toList(),
