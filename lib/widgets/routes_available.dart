@@ -96,24 +96,17 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
                     "Rutas Disponibles",
                     style: TextStyle(fontSize: 20),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child: Icon(
-                      Icons.refresh,
-                      color: Colors.blue,
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
           _isLoading
-              ? const Padding(
+              ? Padding(
                   padding: EdgeInsets.all(30),
                   child: CircularProgressIndicator(),
                 )
               : Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.only(bottom: 30),
                   child: _buildRoutes(),
                 ),
         ],

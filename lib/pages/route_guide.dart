@@ -33,6 +33,7 @@ class RouteGuide extends StatefulWidget {
 class _RouteGuideState extends State<RouteGuide> {
   SharedPreferences? _prefs;
   int _currentTimeStamp = 0;
+  int _checkTimeStamp = 0;
   static const _initialCameraPosition = CameraPosition(
     target: LatLng(19.4445517, -99.0851149),
     zoom: 12,
@@ -118,18 +119,10 @@ class _RouteGuideState extends State<RouteGuide> {
     setState(() {});
   }
 
-  /// Get the route data
-  void _getRouteData() async {
-    _prefs = await SharedPreferences.getInstance();
-    _selectedRoute = _prefs?.getString('route') ?? '';
-    _selectedRouteId = _prefs?.getString('routeId') ?? '';
-    _onRoute = _prefs?.getBool('onRoute') ?? false;
-    _routeFinished = _prefs?.getBool('routeFinished') ?? false;
-  }
-
   /// Set time init to send location
   void _initTime() {
     _currentTimeStamp = DateTime.now().millisecondsSinceEpoch;
+    _checkTimeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
   /// Set icon check point on map
@@ -148,67 +141,13 @@ class _RouteGuideState extends State<RouteGuide> {
         .asUint8List();
   }
 
-  /// Get next point to check in on the route
-  Future<void> _getNextPoint() async {
-    String routeId = _prefs?.getString("routeId") ?? '';
-
-    String url = "${consts.baseUrl}/routes/next_point/$routeId";
-    Uri uri = Uri.parse(url);
-
-    if (!_routeFinished) {
-      final response = await http.get(uri, headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $_auth',
-      });
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body)['nextPoint'];
-        final point = PointMap.fromJson(result);
-
-        _prefs?.setString('nextLat', point.lat.toString());
-        _prefs?.setString('nextLng', point.lng.toString());
-        _prefs?.setString('nextPointId', point.id);
-      } else {
-        _prefs?.setBool('routeFinished', true);
-        _routeFinished = true;
-        Toast.show(
-          response.body,
-          context,
-          duration: Toast.lengthLong,
-        );
-      }
-    }
-  }
-
-  /// get route points
-  /// @param routeId
-  Future<void> _getRoute(routeId) async {
-    String routeUrl = '${consts.baseUrl}/routes/$routeId';
-    final Uri url = Uri.parse(routeUrl);
-
-    final response = await http.get(url, headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $_auth',
-    });
-
-    if (response.statusCode == 200) {
-      final _result = json.decode(response.body)['route'];
-      final _route = RouteMap.fromJson(_result);
-
-      _rebuildMarkers(_route);
-    }
-  }
-
-  /// Ser route on map
-  dynamic _updateRoute(dynamic route) {
-    _selectedRoute = route.name;
-    _selectedRouteId = route.id;
-    _prefs!.setString("route", _selectedRoute);
-    _prefs!.setString("routeId", _selectedRouteId);
-    _joinToRoute(context);
-    _rebuildMarkers(route);
+  /// Get the route data
+  void _getRouteData() async {
+    _prefs = await SharedPreferences.getInstance();
+    _selectedRoute = _prefs?.getString('route') ?? '';
+    _selectedRouteId = _prefs?.getString('routeId') ?? '';
+    _onRoute = _prefs?.getBool('onRoute') ?? false;
+    _routeFinished = _prefs?.getBool('routeFinished') ?? false;
   }
 
   ///Init route data
@@ -237,27 +176,178 @@ class _RouteGuideState extends State<RouteGuide> {
     }
   }
 
+  /// Register point checked
+  void _checkPoint() async {
+    final minutes = 0.2;
+    final pointId = _prefs?.getString('nextPointId');
+    final routeId = _prefs?.getString('routeId');
+
+    String url = '${consts.baseUrl}/points/check/';
+    final Uri uri = Uri.parse(url);
+
+    if (_routeFinished) {
+      return;
+    }
+
+    var _newTime = DateTime.now().millisecondsSinceEpoch;
+    if (_newTime - _checkTimeStamp >= 60000 * minutes) {
+      _checkTimeStamp = _newTime;
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $_auth',
+        },
+        body: json.encode(
+          {
+            "nextPointId": pointId,
+            "routeId": routeId,
+          },
+        ),
+      );
+
+      final result = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        _getNextPoint();
+      } else {
+        Toast.show(
+          result['message'],
+          context,
+          duration: Toast.lengthLong,
+        );
+      }
+    } else {
+      final left = (60000 * minutes - (_newTime - _checkTimeStamp)) / 1000;
+      print("faltan $left segundos");
+    }
+  }
+
+  /// Get next point to check in on the route
+  Future<void> _getNextPoint() async {
+    String routeId = _prefs?.getString("routeId") ?? '';
+    var _routeFinished = _prefs?.getBool("routeFinished") ?? false;
+
+    String url = "${consts.baseUrl}/routes/next_point/$routeId";
+    Uri uri = Uri.parse(url);
+
+    if (!_routeFinished) {
+      final response = await http.get(uri, headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $_auth',
+      });
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body)['nextPoint'];
+        final point = PointMap.fromJson(result);
+
+        _prefs?.setString('nextLat', point.lat.toString());
+        _prefs?.setString('nextLng', point.lng.toString());
+        _prefs?.setString('nextPointId', point.id);
+
+        _getRoute(routeId);
+      } else {
+        _finishRoute(routeId);
+      }
+
+      var socket = Provider.of<SocketService>(context, listen: false);
+      socket.socket.emit("rebuildRoute", {
+        "route": _selectedRoute,
+        "routeId": routeId,
+      });
+    } else {
+      Toast.show(
+        "ruta finalizada",
+        context,
+        duration: Toast.lengthLong,
+      );
+    }
+  }
+
+  /// get route points
+  /// @param routeId
+  Future<void> _getRoute(routeId) async {
+    String routeUrl = '${consts.baseUrl}/routes/$routeId';
+    final Uri url = Uri.parse(routeUrl);
+
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $_auth',
+    });
+
+    if (response.statusCode == 200) {
+      final _result = json.decode(response.body)['route'];
+      final _route = RouteMap.fromJson(_result);
+
+      _rebuildMarkers(_route);
+    } else {
+      Toast.show(
+        response.body,
+        context,
+        duration: Toast.lengthLong,
+      );
+    }
+  }
+
+  /// Ser route on map
+  dynamic _updateRoute(dynamic route) {
+    _selectedRoute = route.name;
+    _selectedRouteId = route.id;
+    _prefs!.setString("route", _selectedRoute);
+    _prefs!.setString("routeId", _selectedRouteId);
+    _joinToRoute(context);
+    _rebuildMarkers(route);
+  }
+
+  Future<void> _finishRoute(routeId) async {
+    String url = "${consts.baseUrl}/routes/finish/$routeId";
+    Uri uri = Uri.parse(url);
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $_auth',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      _prefs?.setBool("routeFinished", true);
+      _routeFinished = true;
+      _onRoute = false;
+      _prefs?.setBool("onRoute", false);
+      _prefs?.remove('nextLat');
+      _prefs?.remove('nextLng');
+      _prefs?.remove('nextPointId');
+      _getRoute(routeId);
+    } else {
+      Toast.show(
+        response.body,
+        context,
+        duration: Toast.lengthLong,
+      );
+    }
+  }
+
   /// Send data socket to server
   void _sendDataSocket(socketService, newLocation) {
-    var nextLat = _prefs?.getString('nextLat');
-    var nextLng = _prefs?.getString('nextLng');
     if (_onRoute) {
       var _newTime = DateTime.now().millisecondsSinceEpoch;
       if (_newTime - _currentTimeStamp >= 1000) {
         _currentTimeStamp = _newTime;
-        if (nextLng != null && nextLat != null) {
-          print("enviando ubicacion");
-          socketService.socket.emit("sendLocation", {
-            "uuid": _name,
-            "lat": newLocation.latitude,
-            "lng": newLocation.longitude,
-            "destination_lat": _prefs?.getString('nextLat'),
-            "destination_lng": _prefs?.getString('nextLng'),
-            "route": _selectedRoute,
-            "routeId": _selectedRouteId,
-            "nextPointId": _prefs?.getString('nextPointId'),
-          });
-        }
+        print("enviando ubicacion");
+        socketService.socket.emit("sendLocation", {
+          "uuid": _name,
+          "lat": newLocation.latitude,
+          "lng": newLocation.longitude,
+          "route": _selectedRoute,
+          "routeId": _selectedRouteId,
+          //"nextPointId": _prefs?.getString('nextPointId'),
+        });
       }
     }
   }
@@ -266,16 +356,17 @@ class _RouteGuideState extends State<RouteGuide> {
   Widget build(BuildContext context) {
     final socketService = Provider.of<SocketService>(context);
 
-    location.onLocationChanged.listen((LocationData newLocation) {
-      _sendDataSocket(socketService, newLocation);
-    });
-
-    socketService.socket.on("rebuildRoute", (payload) {
-      if (!_routeFinished) {
-        var routeId = payload['routeId'];
-        _getRoute(routeId);
+    location.onLocationChanged.listen((LocationData loc) {
+      var nextLat = double.parse(_prefs?.getString('nextLat') ?? '0');
+      var nextLng = double.parse(_prefs?.getString('nextLng') ?? '0');
+      _sendDataSocket(socketService, loc);
+      var lat = loc.latitude;
+      var lng = loc.longitude;
+      var _distance = _haversine(lat!, lng!, nextLat, nextLng);
+      print("la distancia es $_distance");
+      if (_distance <= 0.02) {
+        _checkPoint();
       }
-      _getNextPoint();
     });
 
     return Scaffold(
@@ -460,6 +551,24 @@ class _RouteGuideState extends State<RouteGuide> {
     );
     polylines[id] = polyline;
     setState(() {});
+  }
+
+  /// Haversine formula
+  double _haversine(double lat1, double lon1, double lat2, double lon2) {
+    var R = 6372.8; // In kilometers
+    var dLat = _toRadians(lat2 - lat1);
+    var dLon = _toRadians(lon2 - lon1);
+    lat1 = _toRadians(lat1);
+    lat2 = _toRadians(lat2);
+
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2);
+    var c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return R * c;
+  }
+
+  _toRadians(double degree) {
+    return (degree * pi) / 180;
   }
 
   @override

@@ -45,7 +45,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
   _isOnRoute() async {
     _prefs = await SharedPreferences.getInstance();
     _route = _prefs?.getString('route') ?? "";
-    _onRoute = _prefs?.getBool('on_route') ?? false;
+    _onRoute = _prefs?.getBool('onRoute') ?? false;
     setState(() {});
   }
 
@@ -78,7 +78,10 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       _onRoute = true;
       widget.notifyParent(true);
       _prefs?.setBool('on_route', true);
-      Toast.show('Se ha iniciado la ruta', context);
+      Toast.show(
+        'Se ha iniciado la ruta',
+        context,
+      );
     } else {
       Toast.show(result['message'], context);
     }
