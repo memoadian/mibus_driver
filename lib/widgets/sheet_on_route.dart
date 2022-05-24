@@ -109,16 +109,15 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
     final result = json.decode(response.body);
 
     if (response.statusCode == 200) {
-      _onRoute = false;
-      widget.notifyParent(false);
-      _prefs?.setBool('on_route', false);
-      _prefs?.setString('route', '');
-      _prefs?.setString('routeId', '');
       Toast.show('Se ha finalizado la ruta', context);
     } else {
       Toast.show(result['message'], context);
     }
+    _onRoute = false;
+    _prefs?.setString('route', '');
+    _prefs?.setString('routeId', '');
     _prefs?.setBool('on_route', false);
+    widget.notifyParent(false);
     Navigator.pop(context);
     Future.delayed(const Duration(milliseconds: 200), () {
       Navigator.pop(context);

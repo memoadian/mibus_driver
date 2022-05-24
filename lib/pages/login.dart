@@ -49,6 +49,7 @@ class _LoginState extends State<Login> {
         await storage.write(key: 'name', value: login.driver?.name);
         await storage.write(key: 'email', value: login.driver?.email);
         await storage.write(key: 'company', value: login.driver?.company);
+        await storage.write(key: 'img', value: login.driver?.image);
 
         Navigator.pop(context);
         Navigator.pushReplacementNamed(context, 'route_guide');

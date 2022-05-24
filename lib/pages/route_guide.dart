@@ -208,6 +208,7 @@ class _RouteGuideState extends State<RouteGuide> {
       );
 
       final result = json.decode(response.body);
+      print(result);
 
       if (response.statusCode == 200) {
         _getNextPoint();
@@ -323,10 +324,33 @@ class _RouteGuideState extends State<RouteGuide> {
       _prefs?.remove('nextLat');
       _prefs?.remove('nextLng');
       _prefs?.remove('nextPointId');
+      _checkLastPoint(routeId);
       _getRoute(routeId);
     } else {
       Toast.show(
         response.body,
+        context,
+        duration: Toast.lengthLong,
+      );
+    }
+  }
+
+  Future<void> _checkLastPoint(routeId) async {
+    String url = "${consts.baseUrl}/checkpoints/last/$routeId";
+    Uri uri = Uri.parse(url);
+
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $_auth',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      Toast.show(
+        "Ruta finalizada con éxito",
         context,
         duration: Toast.lengthLong,
       );
@@ -363,7 +387,9 @@ class _RouteGuideState extends State<RouteGuide> {
       var lat = loc.latitude;
       var lng = loc.longitude;
       var _distance = _haversine(lat!, lng!, nextLat, nextLng);
-      print("la distancia es $_distance");
+      if (!_routeFinished) {
+        print("la distancia es $_distance");
+      }
       if (_distance <= 0.02) {
         _checkPoint();
       }
@@ -372,6 +398,12 @@ class _RouteGuideState extends State<RouteGuide> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('MiBus Conductor'),
+        actions: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Image.asset("assets/icons/icon.png"),
+          ),
+        ],
       ),
       body: Consumer<DirectionProvider>(
         builder: (context, api, child) {
