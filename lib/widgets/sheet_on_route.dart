@@ -80,10 +80,9 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       _prefs?.setBool('on_route', true);
       Toast.show(
         'Se ha iniciado la ruta',
-        context,
       );
     } else {
-      Toast.show(result['message'], context);
+      Toast.show(result['message']);
     }
     Navigator.pop(context);
     setState(() {});
@@ -109,9 +108,9 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
     final result = json.decode(response.body);
 
     if (response.statusCode == 200) {
-      Toast.show('Se ha finalizado la ruta', context);
+      Toast.show('Se ha finalizado la ruta');
     } else {
-      Toast.show(result['message'], context);
+      Toast.show(result['message']);
     }
     _onRoute = false;
     _prefs?.setString('route', '');
@@ -161,7 +160,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
                     if (_route != '') {
                       _initRoute();
                     } else {
-                      Toast.show("Selecciona una ruta primero", context);
+                      Toast.show("Selecciona una ruta primero");
                     }
                     setState(() {});
                   },

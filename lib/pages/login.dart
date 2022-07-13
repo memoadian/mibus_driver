@@ -60,7 +60,6 @@ class _LoginState extends State<Login> {
 
         Toast.show(
           login.message,
-          context,
           duration: Toast.lengthLong,
           gravity: Toast.bottom,
         );
@@ -68,7 +67,6 @@ class _LoginState extends State<Login> {
       } else {
         Toast.show(
           "Ocurrió un error al iniciar sesión",
-          context,
           duration: Toast.lengthLong,
           gravity: Toast.bottom,
         );
@@ -77,7 +75,6 @@ class _LoginState extends State<Login> {
     } catch (e) {
       Toast.show(
         "Error de conexión con el servidor",
-        context,
         duration: Toast.lengthLong,
         gravity: Toast.bottom,
       );

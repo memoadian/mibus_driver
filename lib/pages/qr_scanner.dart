@@ -191,7 +191,9 @@ class _QRReaderState extends State<QRReader> {
       back();
       setState(() {
         result = scanData;
-        _setEmployeeOnRoute(result!.code);
+        if (result != null) {
+          _setEmployeeOnRoute(result!.code);
+        }
       });
     });
   }
@@ -207,7 +209,7 @@ class _QRReaderState extends State<QRReader> {
     }
   }
 
-  Future<void> _setEmployeeOnRoute(String code) async {
+  Future<void> _setEmployeeOnRoute(String? code) async {
     String routesUrl = '${consts.baseUrl}/employees/set/$_selectedRouteId';
 
     final Uri url = Uri.parse(routesUrl);
@@ -219,7 +221,7 @@ class _QRReaderState extends State<QRReader> {
         "Authorization": "Bearer $_auth"
       },
       body: jsonEncode(<String, String>{
-        'code': code,
+        'code': code!,
         'driverId': _driverId,
       }),
     );
@@ -400,7 +402,9 @@ class _QRReaderStateDown extends State<QRReaderDown> {
       back();
       setState(() {
         result = scanData;
-        _setEmployeeOffRoute(result!.code);
+        if (result != null) {
+          _setEmployeeOffRoute(result!.code);
+        }
       });
     });
   }
@@ -416,7 +420,7 @@ class _QRReaderStateDown extends State<QRReaderDown> {
     }
   }
 
-  Future<void> _setEmployeeOffRoute(String code) async {
+  Future<void> _setEmployeeOffRoute(String? code) async {
     String routesUrl = '${consts.baseUrl}/employees/off/$_selectedRouteId';
 
     final Uri url = Uri.parse(routesUrl);
@@ -428,7 +432,7 @@ class _QRReaderStateDown extends State<QRReaderDown> {
         "Authorization": "Bearer $_auth"
       },
       body: jsonEncode(<String, String>{
-        'code': code,
+        'code': code!,
         'driverId': _driverId,
       }),
     );

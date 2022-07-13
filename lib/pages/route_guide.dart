@@ -91,6 +91,7 @@ class _RouteGuideState extends State<RouteGuide> {
     try {
       _serviceEnabled = await location.serviceEnabled();
     } on PlatformException catch (e) {
+      print(e);
       _serviceEnabled = false;
       _getPermissions();
     }
@@ -215,7 +216,6 @@ class _RouteGuideState extends State<RouteGuide> {
       } else {
         Toast.show(
           result['message'],
-          context,
           duration: Toast.lengthLong,
         );
       }
@@ -261,7 +261,6 @@ class _RouteGuideState extends State<RouteGuide> {
     } else {
       Toast.show(
         "ruta finalizada",
-        context,
         duration: Toast.lengthLong,
       );
     }
@@ -287,7 +286,6 @@ class _RouteGuideState extends State<RouteGuide> {
     } else {
       Toast.show(
         response.body,
-        context,
         duration: Toast.lengthLong,
       );
     }
@@ -329,7 +327,6 @@ class _RouteGuideState extends State<RouteGuide> {
     } else {
       Toast.show(
         response.body,
-        context,
         duration: Toast.lengthLong,
       );
     }
@@ -351,7 +348,6 @@ class _RouteGuideState extends State<RouteGuide> {
     if (response.statusCode == 200) {
       Toast.show(
         "Ruta finalizada con éxito",
-        context,
         duration: Toast.lengthLong,
       );
     }
