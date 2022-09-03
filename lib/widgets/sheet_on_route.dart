@@ -126,6 +126,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
 
   @override
   Widget build(BuildContext context) {
+    ToastContext().init(context);
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(

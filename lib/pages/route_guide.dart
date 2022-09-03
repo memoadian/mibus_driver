@@ -374,6 +374,7 @@ class _RouteGuideState extends State<RouteGuide> {
 
   @override
   Widget build(BuildContext context) {
+    ToastContext().init(context);
     final socketService = Provider.of<SocketService>(context);
 
     location.onLocationChanged.listen((LocationData loc) {
