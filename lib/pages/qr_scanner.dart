@@ -29,7 +29,7 @@ class QRScanner extends StatelessWidget {
               Navigator.pushNamed(context, 'qr_reader');
             },
             style: ElevatedButton.styleFrom(
-              primary: Colors.blue[400],
+              backgroundColor: Colors.blue[400],
               fixedSize: const Size(300, 50),
               textStyle: const TextStyle(
                 fontSize: 20,
@@ -46,7 +46,7 @@ class QRScanner extends StatelessWidget {
                 Navigator.pushNamed(context, 'qr_down');
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.purple[400],
+                backgroundColor: Colors.purple[400],
                 fixedSize: const Size(300, 50),
                 textStyle: const TextStyle(
                   fontSize: 20,

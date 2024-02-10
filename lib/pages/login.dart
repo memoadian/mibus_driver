@@ -241,13 +241,14 @@ class _LoginState extends State<Login> {
             height: 60,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: const Color(0xFF007AFE),
+                backgroundColor: const Color(0xFF007AFE),
               ),
               child: const Text(
                 "Iniciar Sesión",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               onPressed: () {

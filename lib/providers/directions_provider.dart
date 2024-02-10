@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:google_maps_webservice/directions.dart';
+//import 'package:google_maps_webservice/directions.dart';
+import "package:flutter_google_maps_webservices/directions.dart";
 
 class DirectionProvider extends ChangeNotifier {
   GoogleMapsDirections directionsApi = GoogleMapsDirections(
@@ -13,8 +14,8 @@ class DirectionProvider extends ChangeNotifier {
   Set<maps.Polyline> get currentRoute => _route;
 
   findDirections(maps.LatLng from, maps.LatLng to, waypoints) async {
-    var origin = Location(from.latitude, from.longitude);
-    var destiny = Location(to.latitude, to.longitude);
+    var origin = Location(lat: from.latitude, lng: from.longitude);
+    var destiny = Location(lat: to.latitude, lng: to.longitude);
     var result = await directionsApi.directionsWithLocation(
       origin,
       destiny,
