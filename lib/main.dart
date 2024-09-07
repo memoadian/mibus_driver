@@ -54,8 +54,8 @@ class _MyAppState extends State<MyApp> {
           'login': (context) => const Login(),
           'route_guide': (context) => const RouteGuide(),
           'qr': (context) => const QRScanner(),
-          'qr_down': (context) => const QRReaderDown(),
-          'qr_reader': (context) => const QRReader(),
+          //'qr_down': (context) => const QRReaderDown(),
+          //'qr_reader': (context) => const QRReader(),
         },
         theme: ThemeData(
           primarySwatch: Colors.blue,
