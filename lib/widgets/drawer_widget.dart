@@ -82,39 +82,6 @@ class _DrawerWidgetState extends State<DrawerWidget> {
               context: context,
               tiles: [
                 ListTile(
-                  leading: const Icon(Icons.help),
-                  title: const Text(
-                    "Ayuda",
-                    style: TextStyle(
-                      color: Color(0xFF666666),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () => {},
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text(
-                    "Configuración",
-                    style: TextStyle(
-                      color: Color(0xFF666666),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () => {},
-                ),
-                ListTile(
-                  leading: const Icon(Icons.contact_page),
-                  title: const Text(
-                    "Contacto",
-                    style: TextStyle(
-                      color: Color(0xFF666666),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () => {},
-                ),
-                ListTile(
                   leading: const Icon(Icons.logout),
                   title: const Text('Cerrar Sesión'),
                   onTap: () {

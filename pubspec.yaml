@@ -38,7 +38,7 @@ dependencies:
   google_maps_flutter: ^2.5.3
   flutter_polyline_points: ^2.0.0
   flutter_google_maps_webservices: ^1.1.1
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.3.3
   mobile_scanner: ^5.2.2
   package_info_plus: ^8.0.2
   toast:
