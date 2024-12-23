@@ -69,6 +69,7 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
 
       _routes = _list.map((model) => RouteMap.fromJson(model)).toList();
       setState(() {});
+      print(_routes);
     } else if (response.statusCode == 401) {
       _closeSession(context);
     } else {
@@ -144,7 +145,7 @@ class _RoutesAvailableState extends State<RoutesAvailable> {
           Icons.map,
           color: Colors.green,
         ),
-        title: Text(_routes[index].name),
+        title: Text(_routes[index].name ?? ""),
       ),
     );
   }

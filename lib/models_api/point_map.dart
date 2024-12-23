@@ -1,12 +1,12 @@
 class PointMap {
-  String id;
+  int? id;
   String name;
   String lat;
   String lng;
   bool checked;
 
   PointMap({
-    this.id = "",
+    this.id,
     this.name = "",
     this.lat = "",
     this.lng = "",

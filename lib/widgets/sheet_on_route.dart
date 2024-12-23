@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mibusdriver/models_api/options_end.dart';
+import '/models_api/options_end.dart';
 import '../consts/consts.dart' as consts;
 import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,7 +57,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
   Future<void> _initRoute() async {
     _showDialog("Iniciando Ruta");
 
-    var s = _prefs?.getString('routeId') ?? '';
+    var s = _prefs?.getInt('routeId') ?? 0;
     String url = '${consts.baseUrl}/routes/init/$s';
     final Uri uri = Uri.parse(url);
 
@@ -83,6 +83,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
       );
     } else {
       Toast.show(result['message']);
+      print(result['message']);
     }
     Navigator.pop(context);
     setState(() {});
@@ -90,7 +91,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
 
   Future<void> _endRoute() async {
     _showDialog("Finalizando Ruta");
-    var s = _prefs?.getString('routeId') ?? '';
+    var s = _prefs?.getInt('routeId') ?? 0;
     String url = '${consts.baseUrl}/routes/finish/$s';
 
     final Uri uri = Uri.parse(url);
@@ -114,7 +115,7 @@ class _SheetOnRouteState extends State<SheetOnRoute> {
     }
     _onRoute = false;
     _prefs?.setString('route', '');
-    _prefs?.setString('routeId', '');
+    _prefs?.setInt('routeId', 0);
     _prefs?.setBool('on_route', false);
     widget.notifyParent(false);
     Navigator.pop(context);

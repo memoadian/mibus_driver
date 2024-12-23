@@ -1,22 +1,22 @@
 import 'point_map.dart';
 
 class RouteMap {
-  String id;
-  String name;
-  String company;
+  int? id;
+  String? name;
+  String? company;
   String overview;
   List<PointMap> points;
 
   RouteMap({
-    this.id = "",
-    this.name = "",
-    this.company = "",
+    this.id,
+    this.name,
+    this.company,
     this.overview = "",
     required this.points,
   });
 
   factory RouteMap.fromJson(Map<String, dynamic> json) {
-    Iterable list = json['points'];
+    Iterable list = json['Points'];
     var pointsList = list.map((e) => PointMap.fromJson(e)).toList();
     return RouteMap(
       id: json['id'],

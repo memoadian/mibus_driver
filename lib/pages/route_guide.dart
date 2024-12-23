@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:mibusdriver/models_api/route_map.dart';
+import '/models_api/route_map.dart';
 
 import '/models_api/point_map.dart';
 import '/providers/directions_provider.dart';
@@ -63,7 +63,7 @@ class _RouteGuideState extends State<RouteGuide> {
   String _name = '';
   String _driverId = '';
   String _selectedRoute = '';
-  String _selectedRouteId = '';
+  int _selectedRouteId = 0;
   String _auth = '';
   bool _onRoute = false;
   bool _routeFinished = false;
@@ -146,7 +146,7 @@ class _RouteGuideState extends State<RouteGuide> {
   void _getRouteData() async {
     _prefs = await SharedPreferences.getInstance();
     _selectedRoute = _prefs?.getString('route') ?? '';
-    _selectedRouteId = _prefs?.getString('routeId') ?? '';
+    _selectedRouteId = _prefs?.getInt('routeId') ?? 0;
     _onRoute = _prefs?.getBool('onRoute') ?? false;
     _routeFinished = _prefs?.getBool('routeFinished') ?? false;
   }
@@ -246,7 +246,7 @@ class _RouteGuideState extends State<RouteGuide> {
 
         _prefs?.setString('nextLat', point.lat.toString());
         _prefs?.setString('nextLng', point.lng.toString());
-        _prefs?.setString('nextPointId', point.id);
+        _prefs?.setString('nextPointId', point.id.toString());
 
         _getRoute(routeId);
       } else {
@@ -296,7 +296,7 @@ class _RouteGuideState extends State<RouteGuide> {
     _selectedRoute = route.name;
     _selectedRouteId = route.id;
     _prefs!.setString("route", _selectedRoute);
-    _prefs!.setString("routeId", _selectedRouteId);
+    _prefs!.setInt("routeId", _selectedRouteId);
     _joinToRoute(context);
     _rebuildMarkers(route);
   }

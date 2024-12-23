@@ -1,18 +1,18 @@
 class Driver {
-  String? id;
+  int? id;
   String? name;
   String? lastname;
   String? email;
   String? image;
-  String? company;
+  int? company;
 
   Driver({
-    this.id = "",
-    this.name = "",
-    this.lastname = "",
-    this.email = "",
-    this.image = "",
-    this.company = "",
+    this.id,
+    this.name,
+    this.lastname,
+    this.email,
+    this.image,
+    this.company,
   });
 
   factory Driver.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,7 @@ class Driver {
       lastname: json['lastname'],
       email: json['email'],
       image: json['image'],
-      company: json['company'],
+      company: json['company_id'],
     );
   }
 
@@ -34,7 +34,7 @@ class Driver {
     map['lastname'] = lastname;
     map['email'] = email;
     map['image'] = image;
-    map['company'] = company;
+    map['company_id'] = company;
 
     return map;
   }

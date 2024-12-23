@@ -1,4 +1,4 @@
-name: mibusdriver
+name: mibusconductor
 description: Mi Bus App
 
 # The following line prevents the package from being accidentally published to
@@ -39,7 +39,7 @@ dependencies:
   flutter_polyline_points: ^2.0.0
   flutter_google_maps_webservices: ^1.1.1
   shared_preferences: ^2.3.3
-  mobile_scanner: ^5.2.2
+  simple_barcode_scanner: ^0.2.5
   package_info_plus: ^8.0.2
   toast:
     git:

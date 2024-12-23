@@ -1,4 +1,4 @@
-package com.mibus.mibusdriver
+package com.mibus.conductor
 
 import io.flutter.embedding.android.FlutterActivity
 

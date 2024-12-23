@@ -45,10 +45,11 @@ class _LoginState extends State<Login> {
         var login = LoginResult.fromJson(result);
 
         await storage.write(key: 'auth', value: login.token);
-        await storage.write(key: 'id', value: login.driver?.id);
+        await storage.write(key: 'id', value: login.driver?.id.toString());
         await storage.write(key: 'name', value: login.driver?.name);
         await storage.write(key: 'email', value: login.driver?.email);
-        await storage.write(key: 'company', value: login.driver?.company);
+        await storage.write(
+            key: 'company', value: login.driver?.company.toString());
         await storage.write(key: 'img', value: login.driver?.image);
 
         Navigator.pop(context);
@@ -74,7 +75,7 @@ class _LoginState extends State<Login> {
       }
     } catch (e) {
       Toast.show(
-        "Error de conexión con el servidor",
+        e.toString(),
         duration: Toast.lengthLong,
         gravity: Toast.bottom,
       );

@@ -1,14 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:http/http.dart' as http;
-import '../consts/consts.dart' as consts;
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 class QRScanner extends StatelessWidget {
   const QRScanner({Key? key}) : super(key: key);
@@ -24,37 +15,88 @@ class QRScanner extends StatelessWidget {
                 top: 50, left: 100, right: 100, bottom: 60),
             child: Image.asset("assets/qr-code.png"),
           ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pushNamed(context, 'qr_reader');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[400],
-              fixedSize: const Size(300, 50),
-              textStyle: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                String? res = await SimpleBarcodeScanner.scanBarcode(
+                  context,
+                  barcodeAppBar: const BarcodeAppBar(
+                    appBarTitle: 'Test',
+                    centerTitle: false,
+                    enableBackButton: true,
+                    backButtonIcon: Icon(Icons.arrow_back_ios),
+                  ),
+                  isShowFlashIcon: true,
+                  delayMillis: 500,
+                  cameraFace: CameraFace.back,
+                  scanFormat: ScanFormat.ONLY_BARCODE,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[400],
+                fixedSize: Size(MediaQuery.of(context).size.width, 50),
+              ),
+              label: const Text(
+                'Registrar Ascenso',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              icon: const Icon(
+                Icons.upload,
+                color: Colors.white,
               ),
             ),
-            label: const Text('Registrar Ascenso'),
-            icon: const Icon(Icons.upload),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 40),
+            padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(context, 'manual');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[100],
+                fixedSize: Size(MediaQuery.of(context).size.width, 50),
+              ),
+              label: const Text(
+                'Registro Manual',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              icon: const Icon(
+                Icons.keyboard,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
             child: ElevatedButton.icon(
               onPressed: () {
                 Navigator.pushNamed(context, 'qr_down');
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple[400],
-                fixedSize: const Size(300, 50),
-                textStyle: const TextStyle(
+                backgroundColor: Colors.blue[100],
+                fixedSize: Size(MediaQuery.of(context).size.width, 50),
+              ),
+              label: const Text(
+                'Registrar Descenso',
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              label: const Text('Registrar Descenso'),
-              icon: const Icon(Icons.download),
+              icon: const Icon(
+                Icons.download,
+                color: Colors.white,
+              ),
             ),
           ),
         ],

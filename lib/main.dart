@@ -1,3 +1,5 @@
+import 'package:mibusconductor/pages/manual_register.dart';
+
 import '/pages/route_guide.dart';
 import '/services/socket.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +56,7 @@ class _MyAppState extends State<MyApp> {
           'login': (context) => const Login(),
           'route_guide': (context) => const RouteGuide(),
           'qr': (context) => const QRScanner(),
+          'manual': (context) => const ManualRegister(),
           //'qr_down': (context) => const QRReaderDown(),
           //'qr_reader': (context) => const QRReader(),
         },
