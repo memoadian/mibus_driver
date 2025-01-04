@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 import '/models_api/route_map.dart';
 
 import '/models_api/point_map.dart';

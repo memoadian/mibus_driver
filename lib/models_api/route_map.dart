@@ -16,7 +16,7 @@ class RouteMap {
   });
 
   factory RouteMap.fromJson(Map<String, dynamic> json) {
-    Iterable list = json['Points'];
+    Iterable list = json['points'];
     var pointsList = list.map((e) => PointMap.fromJson(e)).toList();
     return RouteMap(
       id: json['id'],
