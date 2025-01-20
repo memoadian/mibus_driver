@@ -79,7 +79,7 @@ class _RouteGuideState extends State<RouteGuide> {
     super.initState();
   }
 
-  /// CHeck permissions to whow location on init
+  /// CHeck permissions to use the location
   Future<bool> _checkPermissions() async {
     _serviceEnabled = await location.serviceEnabled();
     return _serviceEnabled;
@@ -180,7 +180,10 @@ class _RouteGuideState extends State<RouteGuide> {
   void _checkPoint() async {
     final minutes = 0.2;
     final pointId = _prefs?.getString('nextPointId');
-    final routeId = _prefs?.getString('routeId');
+    final routeId = _prefs?.getInt('routeId');
+
+    print('nextPointId: $pointId');
+    print('routeId: $routeId');
 
     String url = '${consts.baseUrl}/points/check/';
     final Uri uri = Uri.parse(url);
@@ -226,7 +229,7 @@ class _RouteGuideState extends State<RouteGuide> {
 
   /// Get next point to check in on the route
   Future<void> _getNextPoint() async {
-    String routeId = _prefs?.getString("routeId") ?? '';
+    int routeId = _prefs?.getInt("routeId") ?? 0;
     var _routeFinished = _prefs?.getBool("routeFinished") ?? false;
 
     String url = "${consts.baseUrl}/routes/next_point/$routeId";
@@ -241,6 +244,7 @@ class _RouteGuideState extends State<RouteGuide> {
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body)['nextPoint'];
+        print("get next point $result");
         final point = PointMap.fromJson(result);
 
         _prefs?.setString('nextLat', point.lat.toString());
@@ -365,7 +369,7 @@ class _RouteGuideState extends State<RouteGuide> {
           "lng": newLocation.longitude,
           "route": _selectedRoute,
           "routeId": _selectedRouteId,
-          //"nextPointId": _prefs?.getString('nextPointId'),
+          "nextPointId": _prefs?.getString('nextPointId'),
         });
       }
     }
