@@ -82,6 +82,14 @@ class _DrawerWidgetState extends State<DrawerWidget> {
               context: context,
               tiles: [
                 ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text('Aviso de Privacidad'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, 'privacy_policy');
+                  },
+                ),
+                ListTile(
                   leading: const Icon(Icons.logout),
                   title: const Text('Cerrar Sesión'),
                   onTap: () {

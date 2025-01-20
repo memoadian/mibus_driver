@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pages/login.dart';
 import 'pages/qr_scanner.dart';
+import 'pages/privacy.dart';
 import 'providers/directions_provider.dart';
 
 void main() => runApp(const MyApp());
@@ -57,6 +58,7 @@ class _MyAppState extends State<MyApp> {
           'route_guide': (context) => const RouteGuide(),
           'qr': (context) => const QRScanner(),
           'manual': (context) => const ManualRegister(),
+          'privacy_policy': (context) => const PrivacyPolicy(),
           //'qr_down': (context) => const QRReaderDown(),
           //'qr_reader': (context) => const QRReader(),
         },
