@@ -390,7 +390,7 @@ class _RouteGuideState extends State<RouteGuide> {
       if (!_routeFinished) {
         print("la distancia es $_distance");
       }
-      if (_distance <= 0.02) {
+      if (_distance <= 0.05) {
         _checkPoint();
       }
     });
